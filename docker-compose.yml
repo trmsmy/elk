@@ -1,0 +1,19 @@
+elk:
+  image: sebp/elk
+  ports:
+    - "5601:5601"
+    - "9200:9200"
+    - "5044:5044"
+  links:
+   - h2:h2_database
+  volumes:
+    - ./h2:/tmp/h2
+   
+h2:
+  image: oscarfonts/h2
+  ports: 
+    - 1521:1521
+    - 81:81
+  volumes:
+    - ./h2/data:/opt/h2-data
+

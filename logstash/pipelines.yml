@@ -1,0 +1,3 @@
+- pipeline.id: cust_data_to_logstash
+  path.config: "/etc/path/to/p1.config"
+  pipeline.workers: 3

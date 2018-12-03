@@ -1,0 +1,31 @@
+/opt/logstash/bin/logstash --path.data /tmp/logstash/data/ -e 'input { stdin {} } output { stdout {} } '
+/opt/logstash/bin/logstash --path.data /tmp/logstash/data/ -e 'input { stdin { } } output { elasticsearch { hosts => ["localhost"] } }'
+/opt/logstash/bin/logstash --path.data /tmp/logstash/data/ -e 'input {   jdbc {     jdbc_driver_library => "/tmp/h2/h2-driver.jar"     jdbc_driver_class => "org.h2.Driver"     jdbc_connection_string => "jdbc:h2:tcp://h2_database:1521/test"     jdbc_user => "sa"     jdbc_password => ""     statement => "select c.*, ca.street , ca.city , ca.state , ca.zip  from cust c left outer join cust_addr ca on ca.cust_id = c.id "   } }  output {      elasticsearch {             hosts => ["localhost"]             index => "cust"      document_id => "%{[id]}"      }     }'
+
+/opt/logstash/bin/logstash --path.data /tmp/logstash/data/ -e 'input {   jdbc {     jdbc_driver_library => "/tmp/h2/h2-driver.jar"     jdbc_driver_class => "org.h2.Driver"     jdbc_connection_string => "jdbc:h2:tcp://h2_database:1521/test"     jdbc_user => "sa"     jdbc_password => ""     statement_filepath => "/tmp/h2/select.sql" } }  filter {   json {     source => "message"    target => "message"  }  json {    source => "[message][zip]"    target => "[message][addr][zip]"  }  json {    source => "[message][address]"    target => "[message][address]"  }}   output {      elasticsearch {             hosts => ["localhost"]             index => "cust"      document_id => "%{[id]}"      }     }'
+
+
+
+filter {   json {     source => "message"    target => "message"  }  json {    source => "[message][zip]"    target => "[message][addr][zip]"  }  json {    source => "[message][address]"    target => "[message][address]"  }}
+
+
+select c.*,   '{ ' ||  ' "street":"' || ca.street || '", ' ||  ' "city":"' || ca.city || '", ' || ' "state":"' || ca.state || '", ' || ' "zip":"' || ca.zip || '" ' || '}'  from cust c  left outer join cust_addr ca on ca.cust_id = c.id 
+
+
+select c.*,  
+ '{ ' || 
+' "street":"' || ca.street || '", ' ||
+' "city":"' || ca.city || '", ' ||
+' "state":"' || ca.state || '", ' ||
+' "zip":"' || ca.zip || '" ' ||
+ '}' 
+address
+from cust c 
+left outer join cust_addr ca on ca.cust_id = c.id 
+
+
+
+[2018-12-01T12:16:38,334][ERROR][logstash.agent           ] Failed to execute action {:action=>LogStash::PipelineAction::Create/pipeline_id:main, :exception=>"LogStash::ConfigurationError", :message=>"Expected one of #, => at line 1, column 302 (byte 302) after input {   jdbc {     jdbc_driver_library => \"/tmp/h2/h2-driver.jar\"     jdbc_driver_class => \"org.h2.Driver\"     jdbc_connection_string => \"jdbc:h2:tcp://h2_database:1521/test\"     jdbc_user => \"sa\"     jdbc_password => \"\"     statement_filepath => \"/tmp/h2/select.sql\" }  output {      elasticsearch ", :backtrace=>["/opt/logstash/logstash-core/lib/logstash/compiler.rb:41:in `compile_imperative'", "/opt/logstash/logstash-core/lib/logstash/compiler.rb:49:in `compile_graph'", "/opt/logstash/logstash-core/lib/logstash/compiler.rb:11:in `block in compile_sources'", "org/jruby/RubyArray.java:2486:in `map'", "/opt/logstash/logstash-core/lib/logstash/compiler.rb:10:in `compile_sources'", "org/logstash/execution/AbstractPipelineExt.java:149:in `initialize'", "/opt/logstash/logstash-core/lib/logstash/pipeline.rb:22:in `initialize'", "/opt/logstash/logstash-core/lib/logstash/pipeline.rb:90:in `initialize'", "/opt/logstash/logstash-core/lib/logstash/pipeline_action/create.rb:42:in `block in execute'", "/opt/logstash/logstash-core/lib/logstash/agent.rb:92:in `block in exclusive'", "org/jruby/ext/thread/Mutex.java:148:in `synchronize'", "/opt/logstash/logstash-core/lib/logstash/agent.rb:92:in `exclusive'", "/opt/logstash/logstash-core/lib/logstash/pipeline_action/create.rb:38:in `execute'", "/opt/logstash/logstash-core/lib/logstash/agent.rb:317:in `block in converge_state'"]}
+
+
+
